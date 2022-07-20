@@ -1,54 +1,129 @@
-import java.util.*
-import JArduino.*
+/*  TITLE: SELF DRIVING CAR :)
+    CLASS: INTRO TO ENGINEERING
+           SUMMER QUARTER 2022
+    NAMES: MICHAEL DANYLCHUK
+           - FUTURE QUANTUM ENGINEER
+           ISHAAN PATEL
+           - FUTURE ROCKET ENGINEER
 
-public class Car extends JArduino {
+    THE PURPOSE OF THIS PROJECT IS TO PROGRAM AN ARDUINO TO SELF DRIVE USING 4
+    DC MOTORS AND AN UNTRASONIC SENSOR. 
+*/
 
-public Car(String port) {
-    super(port);
+//DEFINING MOTER OUTPUT Ports: 10,11
+#define MOTOR_EN_1_2  10
+#define MOTOR_EN_3_4  11
+
+//DEFINING MOTER INPUTS Ports: 2,3,4,5
+#define MOTOR_IN1     2
+#define MOTOR_IN2     3
+#define MOTOR_IN3     4
+#define MOTOR_IN4     5
+
+// DEFINIG ULTRASONIC SENSOR INPUT port: 10
+#define ULTRASONIC_SENSOR_IN 10
+
+// DEFINING ULTRASONIC SENSOR OUTPUT port: 13
+#define ULTRASONIC_SENSOR_OUT 13
+
+// SPEED DEFINITIONS
+#define slow   64
+#define normal 128
+#define fast   255
+
+// SPEED VARIABLE
+int Speed;
+
+// THIS METHOD SETS UP THE ARDUINO
+void setup() {
+  // setup code, to run once:
+  Serial.begin(9600);
+  Serial.println("L293D DC motor test");
+
+  pinMode(MOTOR_EN_1_2, OUTPUT);
+  pinMode(MOTOR_EN_3_4, OUTPUT)
+  pinMode(MOTOR_IN1, OUTPUT);
+  pinMode(MOTOR_IN2, OUTPUT);
+  pinMode(MOTOR_IN3, OUTPUT);
+  pinMode(MOTOR_IN4, OUTPUT);
+  
 }
 
-@Override
-protected void setup() {
-    // initialize the digital pin as an output.
-    // Pin 13 has an LED connected on most Arduino boards:
-    pinMode(DigitalPin.PIN_12, PinMode.OUTPUT);
+// THIS METHOD SETS UP THE LOOP TO CONTINUE ARDUINO RUNNING
+void loop() {
+  // main code, to run repeatedly:
+ 
 }
 
-@Override
-protected void loop() {
-    // set the LED on
-    digitalWrite(DigitalPin.PIN_12, DigitalState.HIGH);
-    delay(1000); // wait for a second
-    // set the LED off
-    digitalWrite(DigitalPin.PIN_12, DigitalState.LOW);
-    delay(1000); // wait for a second
+//  THIS METHOD MAKES THE CAR BREAK
+void Brake(void){
+  digitalWrite(MOTOR_IN1, HIGH);
+  digitalWrite(MOTOR_IN2, HIGH);
+  digitalWrite(MOTOR_IN3, LOW);
+  digitalWrite(MOTOR_IN4, LOW);
 }
 
-public static void main(String[] args) {
-    String serialPort;
-    if (args.length == 1) {
-        serialPort = args[0];
-    } else {
-        serialPort = Serial4JArduino.selectSerialPort();
-    }
-    JArduino arduino = new Blink(serialPort);
-    arduino.runArduinoProcess();
+// THIS METHOD MAKES THE CAR MOVE FORWARD
+void moveForward_Rev(void){
+  analogWrite(MOTOR_EN_1_2, Speed);
+  analogWrite(MOTOR_EN_3_4, Speed);
+  analogWrite(MOTOR_IN1, HIGH);
+  analogWrite(MOTOR_IN2, HIGH);
+  analogWrite(MOTOR_IN3, LOW);
+  analogWrite(MOTOT_IN4, LOW);
 }
-public class Motor1(){
-int pin = 2
-int speed;
-public Motor1(int speed)
+
+// THIS METHOD MAKES THE CAR ACCELERATE
+void Forward_ramp_up(void){
+  digitalWrite(MOTOR_IN1, HIGH);
+  digitalWrite(MOTOR_IN2, HIGH);
+  digitalWrite(MOTOR_IN3, LOW);
+  digitalWrite(MOTOR_IN4, LOW);
+
+  for (int i=0; i<255; i++) { analogWrite(MOTOR_EN_1_2, i); delay(10); } } void Forward_ramp_down(void){ digitalWrite(MOTOR_IN1, HIGH); digitalWrite(MOTOR_IN2, LOW); for (int i=255; i>=0; i--) {
+    analogWrite(MOTOR_EN_1_2, i);
+    analogWrite(MOTOR_EN_3_4, i);
+    delay(10);
+  }
 
 }
-public class Motor2(){
-int pin = 3
-int speed;
+
+// THIS METHOD MAKES THE CAR MOVE BACKWARD
+void moveBackward_Rev(void){
+  analogWrite(MOTOR_EN_1_2, Speed);
+  analogWrite(MOTOR_EN_3_4, Speed);
+  analogWrite(MOTOR_IN1, HIGH);
+  analogWrite(MOTOR_IN2, HIGH);
+  analogWrite(MOTOR_IN3, LOW);
+  analogWrite(MOTOT_IN4, LOW);
 }
-public class Motor3(){
-int pin = 4
-int speed;
+
+// THIS METHOD MAKES THE CAR DECELERATE
+void Backward_ramp_up(void){
+  digitalWrite(MOTOR_IN1, LOW);
+  digitalWrite(MOTOR_IN2, LOW);
+  digitalWrite(MOTOR_IN3, HIGH);
+  digitalWrite(MOTOR_IN4, HIGH);
+
+  for (int i=0; i<255; i++) { analogWrite(MOTOR_EN_1_2, i); delay(10); } } void Backward_ramp_down(void){ digitalWrite(MOTOR_IN1, LOW); digitalWrite(MOTOR_IN2, HIGH); for (int i=255; i>=0; i--) {
+    analogWrite(MOTOR_EN_1_2, i);
+    analogWrite(MOTOR_EN_3_4, i);
+    delay(10);
+  }
+
 }
-public class Motor4(){
-int pin = 5
-int speed;
+
+// THIS METHOD MAKES THE CAR TURN RIGHT
+void turnRight(){
+
+}
+
+// THIS METHOD MAKES THE CAR TURN LEFT
+void turnLeft(){
+
+}
+
+// THIS METHOD MAKES THE CAR RUN IN A CIRCLE
+void GoInCircle(diameter){
+
 }
