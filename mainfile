@@ -36,6 +36,9 @@
 // SPEED VARIABLE
 int Speed;
 
+int diameter;
+int circumference;
+
 // THIS METHOD SETS UP THE ARDUINO
 void setup() {
   // setup code, to run once:
@@ -48,7 +51,8 @@ void setup() {
   pinMode(MOTOR_IN2, OUTPUT);
   pinMode(MOTOR_IN3, OUTPUT);
   pinMode(MOTOR_IN4, OUTPUT);
-  
+  pinMode(ULTRASONIC_SENSOR_IN, INPUT);
+  pinMode(ULTRASONIC_SENSOR_OUT, OUTPUT);
 }
 
 // THIS METHOD SETS UP THE LOOP TO CONTINUE ARDUINO RUNNING
@@ -57,7 +61,44 @@ void loop() {
  
 }
 
+//THIS METHOD CHECKS THE SIGNAL OUTPUT OF THE ULTRASONIC SENSOR
+void UltrasonicSensorSignalCheck(void){
+  signal = analogRead(ULTRASONIC_SENSOR_IN);
+  on = digitalRead(ULTRASONIC_SENSOR_IN);
+  if(signal == on){
+    ResponseToUltrasonicSensorSignalCheck();
+  }
+}
+
+//THIS METHOD GIVES INSTRUCTIONS FOR CAR IF ULTRASONIC SENSOR SENSES OBSTICAL
+/* 
+                    /\
+                    ||
+                --->||   
+             /\ |----------|
+             || |          |
+             || |__________|
+              <--- (car)
+*/
+void ResponseToUltrasonicSensorSignalCheck(void){
+  turnLeft();
+  moveForward_rev();
+  turnRight();
+  moveForward_rev();
+  turnRight();
+  moveForward_rev();
+  turnLeft();
+}
+
 //  THIS METHOD MAKES THE CAR BREAK
+/*
+          ________
+        /.         \
+       /    STOP    \
+      |.   (car)    |
+       \.          /
+        \_________/
+*/
 void Brake(void){
   analogWrite(MOTOR_IN1, stop);
   analogWrite(MOTOR_IN2, stop);
@@ -66,6 +107,12 @@ void Brake(void){
 }
 
 // THIS METHOD MAKES THE CAR MOVE FORWARD
+/*
+               /\
+               ||
+               ||
+              (car)
+*/
 void moveForward_Rev(void){
   analogWrite(MOTOR_EN_1_2, Speed);
   analogWrite(MOTOR_EN_3_4, Speed);
@@ -91,6 +138,12 @@ void Forward_ramp_up(void){
 }
 
 // THIS METHOD MAKES THE CAR MOVE BACKWARD
+/*           
+             (car)
+               ||
+               ||
+               \/ 
+*/
 void moveBackward_Rev(void){
   analogWrite(MOTOR_EN_1_2, Speed);
   analogWrite(MOTOR_EN_3_4, Speed);
@@ -116,6 +169,9 @@ void Backward_ramp_up(void){
 }
 
 // THIS METHOD MAKES THE CAR TURN RIGHT
+/*
+                (car) -->       
+*/
 void turnRight(){
 	analogWrite(MOTOR_IN1, slow);
   analogWrite(MOTOR_IN2, normal);
@@ -125,6 +181,9 @@ void turnRight(){
 }
 
 // THIS METHOD MAKES THE CAR TURN LEFT
+/*
+              <--(car)
+*/
 void turnLeft(){
 	analogWrite(MOTOR_IN1, normal);
   analogWrite(MOTOR_IN2, slow);
@@ -132,7 +191,22 @@ void turnLeft(){
   analogWrite(MOTORIN_4, slow);
 }
 
-// THIS METHOD MAKES THE CAR RUN IN A CIRCLE
-void GoInCircle(diameter){
+// THIS METHOD IS INSTRUCTIONS FOR THE NORMAL ROUTE THE CAR SHOULD TRAVEL
+void NormalRouteForCarOnCircut(void){
 
 }
+
+// THIS METHOD MAKES THE CAR RUN IN A CIRCLE
+void GoInCircle(diameter){
+  diameter = Math.random(<10);
+  circumference = double((PI)diameter);
+}
+
+/*
+`` METHODS FOR DRIVE CODE:
+   BREAK, MOVEFORWARD_REV, FORWARD_RAMP_UP, MOVEBACKWARD_REV, BACKWARD_RAMP_UP,
+   TURNRIGHT,TURN LEFT, GOINCIRCLE
+
+   METHODS FOR VISION CODE:
+   ULTRASONICSENSORSIGNALCHECK, RESPONSETOULTRASONICSENSORCHECK
+*/
