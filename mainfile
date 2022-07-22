@@ -7,26 +7,28 @@
            - FUTURE ROCKET ENGINEER
 
     THE PURPOSE OF THIS PROJECT IS TO PROGRAM AN ARDUINO TO SELF DRIVE USING 4
-    DC MOTORS AND AN UNTRASONIC SENSOR. 
+    DC MOTORS AND AN ULTRASONIC SENSOR. 
 */
 
-//DEFINING MOTER OUTPUT Ports: 10,11
-#define MOTOR_EN_1_2  10
-#define MOTOR_EN_3_4  11
 
-//DEFINING MOTER INPUTS Ports: 2,3,4,5
-#define MOTOR_IN1     2
-#define MOTOR_IN2     3
-#define MOTOR_IN3     4
-#define MOTOR_IN4     5
+//DEFINING MOTER INPUTS Ports: 3,5,6,9
+//Front left
+#define MOTOR_IN1     3
+//Front right
+#define MOTOR_IN2     5
+//Back left
+#define MOTOR_IN3     6
+//Back right
+#define MOTOR_IN4     9
 
-// DEFINIG ULTRASONIC SENSOR INPUT port: 10
+// DEFINIG ULTRASONIC SENSOR TRIG port: 10
 #define ULTRASONIC_SENSOR_IN 10
 
-// DEFINING ULTRASONIC SENSOR OUTPUT port: 13
+// DEFINING ULTRASONIC SENSOR ECHO port: 13
 #define ULTRASONIC_SENSOR_OUT 13
 
 // SPEED DEFINITIONS
+#define stop   0
 #define slow   64
 #define normal 128
 #define fast   255
@@ -57,10 +59,10 @@ void loop() {
 
 //  THIS METHOD MAKES THE CAR BREAK
 void Brake(void){
-  digitalWrite(MOTOR_IN1, HIGH);
-  digitalWrite(MOTOR_IN2, HIGH);
-  digitalWrite(MOTOR_IN3, LOW);
-  digitalWrite(MOTOR_IN4, LOW);
+  analogWrite(MOTOR_IN1, stop);
+  analogWrite(MOTOR_IN2, stop);
+  analogWrite(MOTOR_IN3, stop);
+  analogWrite(MOTOR_IN4, stop);
 }
 
 // THIS METHOD MAKES THE CAR MOVE FORWARD
@@ -115,12 +117,19 @@ void Backward_ramp_up(void){
 
 // THIS METHOD MAKES THE CAR TURN RIGHT
 void turnRight(){
+	analogWrite(MOTOR_IN1, slow);
+  analogWrite(MOTOR_IN2, normal);
+  analogWrite(MOTORIN_3, slow);
+  analogWrite(MOTORIN_4, normal);
 
 }
 
 // THIS METHOD MAKES THE CAR TURN LEFT
 void turnLeft(){
-
+	analogWrite(MOTOR_IN1, normal);
+  analogWrite(MOTOR_IN2, slow);
+  analogWrite(MOTORIN_3, normal);
+  analogWrite(MOTORIN_4, slow);
 }
 
 // THIS METHOD MAKES THE CAR RUN IN A CIRCLE
