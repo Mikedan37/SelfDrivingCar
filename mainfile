@@ -10,34 +10,34 @@
     DC MOTORS AND AN ULTRASONIC SENSOR. 
 */
 
-
 //DEFINING MOTER INPUTS Ports: 3,5,6,9
+
 //Front left
-#define MOTOR_IN1     3
+int MOTOR_IN1 = 3
 //Front right
-#define MOTOR_IN2     5
+int MOTOR_IN2 = 5
 //Back left
-#define MOTOR_IN3     6
+int MOTOR_IN3 = 6
 //Back right
-#define MOTOR_IN4     9
+int MOTOR_IN4 = 9
 
 // DEFINIG ULTRASONIC SENSOR TRIG port: 10
-#define ULTRASONIC_SENSOR_IN 10
+//#define ULTRASONIC_SENSOR_IN 10
 
 // DEFINING ULTRASONIC SENSOR ECHO port: 13
-#define ULTRASONIC_SENSOR_OUT 13
+//#define ULTRASONIC_SENSOR_OUT 13
+
+// SENSOR OUTPUT PIN
+int ULTRASONIC_PIN = 7;
 
 // SPEED DEFINITIONS
-#define stop   0
-#define slow   64
-#define normal 128
-#define fast   255
+int stop = 0
+int slow = 64
+int normal = 128
+int fast = 255
 
 // SPEED VARIABLE
 int Speed;
-
-int diameter;
-int circumference;
 
 // THIS METHOD SETS UP THE ARDUINO
 void setup() {
@@ -51,23 +51,43 @@ void setup() {
   pinMode(MOTOR_IN2, OUTPUT);
   pinMode(MOTOR_IN3, OUTPUT);
   pinMode(MOTOR_IN4, OUTPUT);
-  pinMode(ULTRASONIC_SENSOR_IN, INPUT);
-  pinMode(ULTRASONIC_SENSOR_OUT, OUTPUT);
 }
 
 // THIS METHOD SETS UP THE LOOP TO CONTINUE ARDUINO RUNNING
 void loop() {
   // main code, to run repeatedly:
- 
-}
+  
+  // Code for Ultrasonic Sensor
 
-//THIS METHOD CHECKS THE SIGNAL OUTPUT OF THE ULTRASONIC SENSOR
-void UltrasonicSensorSignalCheck(void){
-  signal = analogRead(ULTRASONIC_SENSOR_IN);
-  on = digitalRead(ULTRASONIC_SENSOR_IN);
-  if(signal == on){
-    ResponseToUltrasonicSensorSignalCheck();
-  }
+  // ESTABLISHES PING DURATION AND DISTANCE RESAULT IN INCHES AND CENTIMETERS
+  long duration, inches, cm;
+
+  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+ pinMode(ULTRASONIC_PIN, OUTPUT);
+ digitalWrite(ULTRASONIC_PIN, LOW);
+ delayMicroseconds(2);
+ digitalWrite(ULTRASONIC_PIN,HIGH);
+ delayMicroseconds(5);
+ digitalWrite(ULTRASONIC_PIN, LOW);
+
+ // The same pin is used to read the signal from the PING))): a HIGH pulse
+ // whose duration is the time (in microseconds) from the sending of the ping
+ // to the reception of its echo off of an object.
+ pinMode(ULTRASONIC_PIN, INPUT);
+ duration = pulseIn(ULTRASONIC_PIN, HIGH);
+ 
+ // CONVERT TIME TO DISTANCE
+ inches = microsecondsToInches(duration); 
+ cm = microsecondsToCentimeters(duration);
+ 
+ Serial.print(inches);
+ Serial.print("in, ");
+ Serial.print(cm);
+ Serial.print("cm");
+ Serial.println();
+
+ delay(100);
 }
 
 //THIS METHOD GIVES INSTRUCTIONS FOR CAR IF ULTRASONIC SENSOR SENSES OBSTICAL
@@ -80,7 +100,7 @@ void UltrasonicSensorSignalCheck(void){
              || |__________|
               <--- (car)
 */
-void ResponseToUltrasonicSensorSignalCheck(void){
+void ResponseToUltrasonicSensor(void){
   turnLeft();
   moveForward_rev();
   turnRight();
@@ -93,11 +113,11 @@ void ResponseToUltrasonicSensorSignalCheck(void){
 //  THIS METHOD MAKES THE CAR BREAK
 /*
           ________
-        /.         \
+        /          \
        /    STOP    \
-      |.   (car)    |
-       \.          /
-        \_________/
+      |    (car)     |
+       \            /
+        \ ________ /
 */
 void Brake(void){
   analogWrite(MOTOR_IN1, stop);
@@ -129,7 +149,7 @@ void Forward_ramp_up(void){
   digitalWrite(MOTOR_IN3, LOW);
   digitalWrite(MOTOR_IN4, LOW);
 
-  for (int i=0; i<255; i++) { analogWrite(MOTOR_EN_1_2, i); delay(10); } } void Forward_ramp_down(void){ digitalWrite(MOTOR_IN1, HIGH); digitalWrite(MOTOR_IN2, LOW); for (int i=255; i>=0; i--) {
+  for (int i=0; i<255; i++) { 
     analogWrite(MOTOR_EN_1_2, i);
     analogWrite(MOTOR_EN_3_4, i);
     delay(10);
@@ -154,13 +174,13 @@ void moveBackward_Rev(void){
 }
 
 // THIS METHOD MAKES THE CAR DECELERATE
-void Backward_ramp_up(void){
+void Backward_ramp_down(void){
   digitalWrite(MOTOR_IN1, LOW);
   digitalWrite(MOTOR_IN2, LOW);
   digitalWrite(MOTOR_IN3, HIGH);
   digitalWrite(MOTOR_IN4, HIGH);
 
-  for (int i=0; i<255; i++) { analogWrite(MOTOR_EN_1_2, i); delay(10); } } void Backward_ramp_down(void){ digitalWrite(MOTOR_IN1, LOW); digitalWrite(MOTOR_IN2, HIGH); for (int i=255; i>=0; i--) {
+  for (int i=0; i<255; i--) {
     analogWrite(MOTOR_EN_1_2, i);
     analogWrite(MOTOR_EN_3_4, i);
     delay(10);
@@ -196,10 +216,40 @@ void NormalRouteForCarOnCircut(void){
 
 }
 
-// THIS METHOD MAKES THE CAR RUN IN A CIRCLE
-void GoInCircle(diameter){
-  diameter = Math.random(<10);
-  circumference = double((PI)diameter);
+// THIS METHOD CONVERTS ULTRASONIC SENSOR INPUT TO INCHES
+long microsecondsToInches(long microseconds){
+    // According to Parallax's datasheet for the PING))), there are 73.746
+  // microseconds per inch (i.e. sound travels at 1130 feet per second).
+  // This gives the distance travelled by the ping, outbound and return,
+  // so we divide by 2 to get the distance of the obstacle.
+  // See: https://www.parallax.com/package/ping-ultrasonic-distance-sensor-downloads/
+  return microseconds / 74 / 2;
+}
+
+// THIS METHOD CONVERTS ULTRASONIC SENSOR INPUT TO CENTIMETERS
+long microsecondsToCentimeters(long microseconds){
+  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+  // The ping travels out and back, so to find the distance of the object we
+  // take half of the distance travelled.
+  return microseconds / 29 / 2;
+}
+
+//Units in/sec
+int speedOfCar(int CurSpeedSetting){
+// Wheel Diameter is 1.5 in
+// Highest RPM on Dc Moter is 255
+// Length of one rotation convert rpm to feet per second
+// Angular velocity is equal to 6 x rpm which gets units degrees per second
+}
+
+long distanceTraveledByCar{
+// Using some kinematic equations 𝑑=𝑣𝑖𝑡+12𝑎𝑡2
+
+
+}
+
+long timeTraveledByCarPriorToBreak{
+
 }
 
 /*
@@ -208,5 +258,5 @@ void GoInCircle(diameter){
    TURNRIGHT,TURN LEFT, GOINCIRCLE
 
    METHODS FOR VISION CODE:
-   ULTRASONICSENSORSIGNALCHECK, RESPONSETOULTRASONICSENSORCHECK
+   
 */
