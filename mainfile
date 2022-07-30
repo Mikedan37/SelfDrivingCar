@@ -1,54 +1,262 @@
-import java.util.*
-import JArduino.*
+/*  TITLE: SELF DRIVING CAR :)
+    CLASS: INTRO TO ENGINEERING
+           SUMMER QUARTER 2022
+    NAMES: MICHAEL DANYLCHUK
+           - FUTURE QUANTUM ENGINEER
+           ISHAAN PATEL
+           - FUTURE ROCKET ENGINEER
 
-public class Car extends JArduino {
+    THE PURPOSE OF THIS PROJECT IS TO PROGRAM AN ARDUINO TO SELF DRIVE USING 4
+    DC MOTORS AND AN ULTRASONIC SENSOR. 
+*/
 
-public Car(String port) {
-    super(port);
+//DEFINING MOTER INPUTS Ports: 3,5,6,9
+
+//Front left
+int MOTOR_IN1 = 3
+//Front right
+int MOTOR_IN2 = 5
+//Back left
+int MOTOR_IN3 = 6
+//Back right
+int MOTOR_IN4 = 9
+
+// DEFINIG ULTRASONIC SENSOR TRIG port: 10
+//#define ULTRASONIC_SENSOR_IN 10
+
+// DEFINING ULTRASONIC SENSOR ECHO port: 13
+//#define ULTRASONIC_SENSOR_OUT 13
+
+// SENSOR OUTPUT PIN
+int ULTRASONIC_PIN = 7;
+
+// SPEED DEFINITIONS
+int stop = 0
+int slow = 64
+int normal = 128
+int fast = 255
+
+// SPEED VARIABLE
+int Speed;
+
+// THIS METHOD SETS UP THE ARDUINO
+void setup() {
+  // setup code, to run once:
+  Serial.begin(9600);
+  Serial.println("L293D DC motor test");
+
+  pinMode(MOTOR_EN_1_2, OUTPUT);
+  pinMode(MOTOR_EN_3_4, OUTPUT)
+  pinMode(MOTOR_IN1, OUTPUT);
+  pinMode(MOTOR_IN2, OUTPUT);
+  pinMode(MOTOR_IN3, OUTPUT);
+  pinMode(MOTOR_IN4, OUTPUT);
 }
 
-@Override
-protected void setup() {
-    // initialize the digital pin as an output.
-    // Pin 13 has an LED connected on most Arduino boards:
-    pinMode(DigitalPin.PIN_12, PinMode.OUTPUT);
+// THIS METHOD SETS UP THE LOOP TO CONTINUE ARDUINO RUNNING
+void loop() {
+  // main code, to run repeatedly:
+  
+  // Code for Ultrasonic Sensor
+
+  // ESTABLISHES PING DURATION AND DISTANCE RESAULT IN INCHES AND CENTIMETERS
+  long duration, inches, cm;
+
+  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+ pinMode(ULTRASONIC_PIN, OUTPUT);
+ digitalWrite(ULTRASONIC_PIN, LOW);
+ delayMicroseconds(2);
+ digitalWrite(ULTRASONIC_PIN,HIGH);
+ delayMicroseconds(5);
+ digitalWrite(ULTRASONIC_PIN, LOW);
+
+ // The same pin is used to read the signal from the PING))): a HIGH pulse
+ // whose duration is the time (in microseconds) from the sending of the ping
+ // to the reception of its echo off of an object.
+ pinMode(ULTRASONIC_PIN, INPUT);
+ duration = pulseIn(ULTRASONIC_PIN, HIGH);
+ 
+ // CONVERT TIME TO DISTANCE
+ inches = microsecondsToInches(duration); 
+ cm = microsecondsToCentimeters(duration);
+ 
+ Serial.print(inches);
+ Serial.print("in, ");
+ Serial.print(cm);
+ Serial.print("cm");
+ Serial.println();
+
+ delay(100);
 }
 
-@Override
-protected void loop() {
-    // set the LED on
-    digitalWrite(DigitalPin.PIN_12, DigitalState.HIGH);
-    delay(1000); // wait for a second
-    // set the LED off
-    digitalWrite(DigitalPin.PIN_12, DigitalState.LOW);
-    delay(1000); // wait for a second
+//THIS METHOD GIVES INSTRUCTIONS FOR CAR IF ULTRASONIC SENSOR SENSES OBSTICAL
+/* 
+                    /\
+                    ||
+                --->||   
+             /\ |----------|
+             || |          |
+             || |__________|
+              <--- (car)
+*/
+void ResponseToUltrasonicSensor(void){
+  turnLeft();
+  moveForward_rev();
+  turnRight();
+  moveForward_rev();
+  turnRight();
+  moveForward_rev();
+  turnLeft();
 }
 
-public static void main(String[] args) {
-    String serialPort;
-    if (args.length == 1) {
-        serialPort = args[0];
-    } else {
-        serialPort = Serial4JArduino.selectSerialPort();
-    }
-    JArduino arduino = new Blink(serialPort);
-    arduino.runArduinoProcess();
+//  THIS METHOD MAKES THE CAR BREAK
+/*
+          ________
+        /          \
+       /    STOP    \
+      |    (car)     |
+       \            /
+        \ ________ /
+*/
+void Brake(void){
+  analogWrite(MOTOR_IN1, stop);
+  analogWrite(MOTOR_IN2, stop);
+  analogWrite(MOTOR_IN3, stop);
+  analogWrite(MOTOR_IN4, stop);
 }
-public class Motor1(){
-int pin = 2
-int speed;
-public Motor1(int speed)
+
+// THIS METHOD MAKES THE CAR MOVE FORWARD
+/*
+               /\
+               ||
+               ||
+              (car)
+*/
+void moveForward_Rev(void){
+  analogWrite(MOTOR_EN_1_2, Speed);
+  analogWrite(MOTOR_EN_3_4, Speed);
+  analogWrite(MOTOR_IN1, HIGH);
+  analogWrite(MOTOR_IN2, HIGH);
+  analogWrite(MOTOR_IN3, LOW);
+  analogWrite(MOTOT_IN4, LOW);
+}
+
+// THIS METHOD MAKES THE CAR ACCELERATE
+void Forward_ramp_up(void){
+  digitalWrite(MOTOR_IN1, HIGH);
+  digitalWrite(MOTOR_IN2, HIGH);
+  digitalWrite(MOTOR_IN3, LOW);
+  digitalWrite(MOTOR_IN4, LOW);
+
+  for (int i=0; i<255; i++) { 
+    analogWrite(MOTOR_EN_1_2, i);
+    analogWrite(MOTOR_EN_3_4, i);
+    delay(10);
+  }
 
 }
-public class Motor2(){
-int pin = 3
-int speed;
+
+// THIS METHOD MAKES THE CAR MOVE BACKWARD
+/*           
+             (car)
+               ||
+               ||
+               \/ 
+*/
+void moveBackward_Rev(void){
+  analogWrite(MOTOR_EN_1_2, Speed);
+  analogWrite(MOTOR_EN_3_4, Speed);
+  analogWrite(MOTOR_IN1, HIGH);
+  analogWrite(MOTOR_IN2, HIGH);
+  analogWrite(MOTOR_IN3, LOW);
+  analogWrite(MOTOT_IN4, LOW);
 }
-public class Motor3(){
-int pin = 4
-int speed;
+
+// THIS METHOD MAKES THE CAR DECELERATE
+void Backward_ramp_down(void){
+  digitalWrite(MOTOR_IN1, LOW);
+  digitalWrite(MOTOR_IN2, LOW);
+  digitalWrite(MOTOR_IN3, HIGH);
+  digitalWrite(MOTOR_IN4, HIGH);
+
+  for (int i=0; i<255; i--) {
+    analogWrite(MOTOR_EN_1_2, i);
+    analogWrite(MOTOR_EN_3_4, i);
+    delay(10);
+  }
+
 }
-public class Motor4(){
-int pin = 5
-int speed;
+
+// THIS METHOD MAKES THE CAR TURN RIGHT
+/*
+                (car) -->       
+*/
+void turnRight(){
+	analogWrite(MOTOR_IN1, slow);
+  analogWrite(MOTOR_IN2, normal);
+  analogWrite(MOTORIN_3, slow);
+  analogWrite(MOTORIN_4, normal);
+
 }
+
+// THIS METHOD MAKES THE CAR TURN LEFT
+/*
+              <--(car)
+*/
+void turnLeft(){
+	analogWrite(MOTOR_IN1, normal);
+  analogWrite(MOTOR_IN2, slow);
+  analogWrite(MOTORIN_3, normal);
+  analogWrite(MOTORIN_4, slow);
+}
+
+// THIS METHOD IS INSTRUCTIONS FOR THE NORMAL ROUTE THE CAR SHOULD TRAVEL
+void NormalRouteForCarOnCircut(void){
+
+}
+
+// THIS METHOD CONVERTS ULTRASONIC SENSOR INPUT TO INCHES
+long microsecondsToInches(long microseconds){
+    // According to Parallax's datasheet for the PING))), there are 73.746
+  // microseconds per inch (i.e. sound travels at 1130 feet per second).
+  // This gives the distance travelled by the ping, outbound and return,
+  // so we divide by 2 to get the distance of the obstacle.
+  // See: https://www.parallax.com/package/ping-ultrasonic-distance-sensor-downloads/
+  return microseconds / 74 / 2;
+}
+
+// THIS METHOD CONVERTS ULTRASONIC SENSOR INPUT TO CENTIMETERS
+long microsecondsToCentimeters(long microseconds){
+  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+  // The ping travels out and back, so to find the distance of the object we
+  // take half of the distance travelled.
+  return microseconds / 29 / 2;
+}
+
+//Units in/sec
+int speedOfCar(int CurSpeedSetting){
+// Wheel Diameter is 1.5 in
+// Highest RPM on Dc Moter is 255
+// Length of one rotation convert rpm to feet per second
+// Angular velocity is equal to 6 x rpm which gets units degrees per second
+}
+
+long distanceTraveledByCar{
+// Using some kinematic equations 𝑑=𝑣𝑖𝑡+12𝑎𝑡2
+
+
+}
+
+long timeTraveledByCarPriorToBreak{
+
+}
+
+/*
+`` METHODS FOR DRIVE CODE:
+   BREAK, MOVEFORWARD_REV, FORWARD_RAMP_UP, MOVEBACKWARD_REV, BACKWARD_RAMP_UP,
+   TURNRIGHT,TURN LEFT, GOINCIRCLE
+
+   METHODS FOR VISION CODE:
+   
+*/
